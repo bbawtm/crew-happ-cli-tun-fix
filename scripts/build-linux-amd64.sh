@@ -13,6 +13,12 @@ git clone --depth 1 --branch "$happ_ref" "$happ_url" "$workspace/happ-cli"
 git clone --depth 1 --branch "$tun_ref" "$tun_url" "$workspace/happ-cli/third_party/tun2socks"
 git -C "$workspace/happ-cli/third_party/tun2socks" apply "$root/patches/tun2socks-start-error.patch"
 git -C "$workspace/happ-cli" apply "$root/patches/happ-cli-tun-error-propagation.patch"
+if [[ "$(uname -s)" == Darwin ]]; then
+  base64 -D -i "$root/patches/happ-cli-tun-stage-markers.patch.b64" > "$workspace/happ-cli-stage-markers.patch"
+else
+  base64 --decode --input "$root/patches/happ-cli-tun-stage-markers.patch.b64" > "$workspace/happ-cli-stage-markers.patch"
+fi
+git -C "$workspace/happ-cli" apply "$workspace/happ-cli-stage-markers.patch"
 
 (
   cd "$workspace/happ-cli"
