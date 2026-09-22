@@ -1,0 +1,50 @@
+diff --git a/engine/engine.go b/engine/engine.go
+index 3843ead..6584e78 100644
+--- a/engine/engine.go
++++ b/engine/engine.go
+@@ -41,11 +41,19 @@ var (
+ 
+ // Start starts the default engine up.
+ func Start() {
+-	if err := start(); err != nil {
++	if err := StartE(); err != nil {
+ 		log.Fatalf("[ENGINE] failed to start: %v", err)
+ 	}
+ }
+ 
++// StartE starts the default engine and returns an initialization error to an
++// embedding application. Start retains the historical CLI behavior, while
++// embedders can restore their own networking state instead of being terminated
++// by log.Fatalf during device creation.
++func StartE() error {
++	return start()
++}
++
+ // Stop shuts the default engine down.
+ func Stop() {
+ 	if err := stop(); err != nil {
+diff --git a/engine/engine_embed_test.go b/engine/engine_embed_test.go
+new file mode 100644
+index 0000000..5f3c4f5
+--- /dev/null
++++ b/engine/engine_embed_test.go
+@@ -0,0 +1,19 @@
++package engine
++
++import "testing"
++
++func TestStartEReturnsInitializationErrorForEmbedding(t *testing.T) {
++	_engineMu.Lock()
++	previous := _defaultKey
++	_defaultKey = nil
++	_engineMu.Unlock()
++	t.Cleanup(func() {
++		_engineMu.Lock()
++		_defaultKey = previous
++		_engineMu.Unlock()
++	})
++
++	if err := StartE(); err == nil {
++		t.Fatal("StartE accepted an empty engine key")
++	}
++}

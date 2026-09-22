@@ -1,0 +1,25 @@
+diff --git a/go.mod b/go.mod
+index 632d70c..4b12f35 100644
+--- a/go.mod
++++ b/go.mod
+@@ -85,3 +85,5 @@ require (
+ // Do not remove this without re-checking that both internal/xray and
+ // internal/tunnel still compile.
+ replace gvisor.dev/gvisor => gvisor.dev/gvisor v0.0.0-20250523182742-eede7a881b20
++
++replace github.com/xjasonlyu/tun2socks/v2 => ./third_party/tun2socks
+diff --git a/internal/tunnel/tunnel_linux.go b/internal/tunnel/tunnel_linux.go
+index 65095c5..024a93d 100644
+--- a/internal/tunnel/tunnel_linux.go
++++ b/internal/tunnel/tunnel_linux.go
+@@ -60,7 +60,9 @@ func Start(opts Options) (*Tunnel, error) {
+ 		UDPTimeout: 30 * time.Second,
+ 	}
+ 	engine.Insert(key)
+-	engine.Start()
++	if err := engine.StartE(); err != nil {
++		return nil, fmt.Errorf("start embedded TUN engine: %w", err)
++	}
+ 
+ 	t := &Tunnel{}
+ 	t.teardown = append(t.teardown, func() { engine.Stop() })
