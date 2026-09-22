@@ -16,7 +16,7 @@ git -C "$workspace/happ-cli" apply "$root/patches/happ-cli-tun-error-propagation
 if [[ "$(uname -s)" == Darwin ]]; then
   base64 -D -i "$root/patches/happ-cli-tun-stage-markers.patch.b64" > "$workspace/happ-cli-stage-markers.patch"
 else
-  base64 --decode --input "$root/patches/happ-cli-tun-stage-markers.patch.b64" > "$workspace/happ-cli-stage-markers.patch"
+  base64 --decode "$root/patches/happ-cli-tun-stage-markers.patch.b64" > "$workspace/happ-cli-stage-markers.patch"
 fi
 git -C "$workspace/happ-cli" apply "$workspace/happ-cli-stage-markers.patch"
 
